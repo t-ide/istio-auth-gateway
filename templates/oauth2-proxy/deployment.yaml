@@ -58,7 +58,7 @@ spec:
               value: {{ quote .Values.gateway.oauth2Proxy.logging.auth }}
             - name: OAUTH2_PROXY_REQUEST_LOGGING
               value: {{ quote .Values.gateway.oauth2Proxy.logging.request }}
-            {{- if not .Values.gateway.oauth2Proxy.logging.healthCheckLog }}
+            {{- if not .Values.gateway.oauth2Proxy.logging.healthCheck }}
             - name: OAUTH2_PROXY_EXCLUDE_LOGGING_PATHS
               value: "/ping"
             {{- end }}

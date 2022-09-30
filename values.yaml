@@ -90,7 +90,7 @@ gateway:
       # -- Specifies whether to output request logs
       request: true
       # -- Specifies whether to output request logs of health check
-      healthCheckLog: false
+      healthCheck: false
 
     # -- Extra environment variables to add to oauth2-proxy.
     # Please see [values.yaml](./values.yaml) and

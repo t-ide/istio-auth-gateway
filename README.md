@@ -163,7 +163,7 @@ kubectl delete secret myclient --namespace keycloak
 | gateway.oauth2Proxy.xAuthRequest | bool | `true` | Propagate user info(email, username) to the client application |
 | gateway.oauth2Proxy.logging.auth | bool | `true` | Specifies whether to output the log when a user authenticates |
 | gateway.oauth2Proxy.logging.request | bool | `true` | Specifies whether to output request logs |
-| gateway.oauth2Proxy.logging.healthCheckLog | bool | `false` | Specifies whether to output request logs of health check |
+| gateway.oauth2Proxy.logging.healthCheck | bool | `false` | Specifies whether to output request logs of health check |
 | gateway.oauth2Proxy.extraEnvVars | list | `[]` | Extra environment variables to add to oauth2-proxy. Please see [values.yaml](./values.yaml) and [Oauth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/) for details. |
 | gateway.oauth2Proxy.image.repository | string | `"quay.io/oauth2-proxy/oauth2-proxy"` | Container image repository of OAuth2 Proxy |
 | gateway.oauth2Proxy.image.tag | string | `"v7.3.0"` | Container image tag of OAuth2 Proxy (immutable tags are recommended) |
