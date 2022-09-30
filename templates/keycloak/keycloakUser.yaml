@@ -1,0 +1,24 @@
+{{- if and .Values.keycloak.realm.sample.create .Values.keycloak.realm.sample.user.create -}}
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakUser
+metadata:
+  name: {{ include "auth-gateway.fullname" . }}
+  labels:
+    {{- include "auth-gateway.labels" . | nindent 4 }}
+  namespace: {{ .Values.keycloak.namespace }}
+spec:
+  realmSelector:
+    matchLabels:
+      {{- include "auth-gateway.relamLabels" . | nindent 6 }}
+  user:
+    username: {{ .Values.keycloak.realm.sample.user.name }}
+    firstName: "John"
+    lastName: "Doe"
+    email: "sample@example.com"
+    enabled: true
+    emailVerified: true ## For the verification of oauth2-proxy
+    credentials:
+      - temporary: false
+        type: password
+        value: {{ .Values.keycloak.realm.sample.user.password }}
+{{- end }}

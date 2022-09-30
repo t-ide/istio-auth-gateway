@@ -1,0 +1,16 @@
+{{- if .Values.keycloak.realm.sample.create -}}
+apiVersion: "keycloak.org/v1alpha1"
+kind: KeycloakRealm
+metadata:
+  name: {{ include "auth-gateway.fullname" . }}
+  labels:
+    {{- include "auth-gateway.labels" . | nindent 4 }}
+  namespace: {{ .Values.keycloak.namespace }}
+spec:
+  instanceSelector:
+    matchLabels:
+      {{- toYaml .Values.keycloak.realm.sample.keycloakLabels | nindent 6 }}
+  realm:
+    enabled: true
+    realm: {{ .Values.keycloak.realm.name }}
+{{- end }}

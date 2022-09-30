@@ -1,0 +1,116 @@
+{{- if eq .Values.gateway.type "oauth2-proxy" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "auth-gateway.gatewayName" . }}
+  labels:
+    {{- include "auth-gateway.labels" . | nindent 4 }}
+  namespace: {{ .Values.keycloak.namespace }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "auth-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        ## Deploy Pod when helm upgrades in order to read Secret
+        checksum/config: {{ include (print $.Template.BasePath "/oauth2-proxy/secret.yaml") . | sha256sum }}
+        {{- with .Values.gateway.podAnnotations -}}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "auth-gateway.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.gateway.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "auth-gateway.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.gateway.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.gateway.securityContext | nindent 12 }}
+          image: "{{ .Values.gateway.oauth2Proxy.image.repository }}:{{ .Values.gateway.oauth2Proxy.image.tag }}"
+          imagePullPolicy: {{ .Values.gateway.oauth2Proxy.image.pullPolicy }}
+          env:
+            {{- with .Values.gateway.oauth2Proxy.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            - name: OAUTH2_PROXY_COOKIE_NAME
+              value: {{ .Values.gateway.oauth2Proxy.cookie.name }}
+            - name: OAUTH2_PROXY_COOKIE_SAMESITE
+              value: {{ .Values.gateway.oauth2Proxy.cookie.sameSite }}
+            - name: OAUTH2_PROXY_COOKIE_REFRESH
+              value: {{ .Values.gateway.oauth2Proxy.cookie.refresh }}
+            - name: OAUTH2_PROXY_COOKIE_EXPIRE
+              value: {{ .Values.gateway.oauth2Proxy.cookie.expire }}
+            - name: OAUTH2_PROXY_COOKIE_SECURE
+              value: {{ quote .Values.gateway.oauth2Proxy.cookie.secure }}
+            - name: OAUTH2_PROXY_SSL_INSECURE_SKIP_VERIFY
+              value: {{ quote .Values.gateway.oauth2Proxy.sslInsecureSkipVerify }}
+            - name: OAUTH2_PROXY_EMAIL_DOMAINS
+              value: {{ quote .Values.gateway.oauth2Proxy.emailDomains }}
+            - name: OAUTH2_PROXY_SET_XAUTHREQUEST
+              value: {{ quote .Values.gateway.oauth2Proxy.xAuthRequest }}
+            - name: OAUTH2_PROXY_AUTH_LOGGING
+              value: {{ quote .Values.gateway.oauth2Proxy.logging.auth }}
+            - name: OAUTH2_PROXY_REQUEST_LOGGING
+              value: {{ quote .Values.gateway.oauth2Proxy.logging.request }}
+            {{- if not .Values.gateway.oauth2Proxy.logging.healthCheckLog }}
+            - name: OAUTH2_PROXY_EXCLUDE_LOGGING_PATHS
+              value: "/ping"
+            {{- end }}
+            - name: OAUTH2_PROXY_PROVIDER
+              value: oidc
+            - name: OAUTH2_PROXY_HTTP_ADDRESS
+              value: "0.0.0.0:4180"
+            - name: OAUTH2_PROXY_UPSTREAMS
+              value: "static://200"
+            - name: OAUTH2_PROXY_SKIP_PROVIDER_BUTTON
+              value: "true"
+            - name: OAUTH2_PROXY_OIDC_ISSUER_URL
+              value: "{{- .Values.keycloak.frontendUrl }}/auth/realms/{{ .Values.keycloak.realm.name }}"
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "auth-gateway.clientSecret" . }}
+                  key: CLIENT_ID
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "auth-gateway.clientSecret" . }}
+                  key: CLIENT_SECRET
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "auth-gateway.gatewayName" . }}
+                  key: OAUTH2_PROXY_COOKIE_SECRET
+          ports:
+            - name: http
+              containerPort: 4180
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+          resources:
+            {{- toYaml .Values.gateway.resources | nindent 12 }}
+      {{- with .Values.gateway.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

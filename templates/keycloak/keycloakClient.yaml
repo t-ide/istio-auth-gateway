@@ -1,0 +1,33 @@
+{{- if .Values.keycloak.client.sample.create -}}
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakClient
+metadata:
+  name: {{ include "auth-gateway.fullname" . }}
+  labels:
+    {{- include "auth-gateway.labels" . | nindent 4 }}
+  namespace: {{ .Values.keycloak.namespace }}
+spec:
+  realmSelector:
+    matchLabels:
+      {{- include "auth-gateway.relamLabels" . | nindent 6 }}
+  client:
+    clientId: {{ .Values.keycloak.client.sample.name }}
+    enabled: true
+    clientAuthenticatorType: client-secret
+    protocol: openid-connect
+    redirectUris:
+      - {{ .Values.endpoint.frontendUrl }}
+    standardFlowEnabled: true
+    directAccessGrantsEnabled: true
+    defaultClientScopes:
+      - web-origins
+      - acr
+      - roles
+      - profile
+      - email
+    optionalClientScopes:
+      - address
+      - phone
+      - offline_access
+      - microprofile-jwt
+{{- end }}

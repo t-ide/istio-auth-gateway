@@ -1,0 +1,36 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: {{ include "auth-gateway.fullname" . }}
+  labels:
+    {{- include "auth-gateway.labels" . | nindent 4 }}
+  namespace: {{ .Values.endpoint.namespace }}
+spec:
+  workloadSelector:
+    labels:
+      {{- toYaml .Values.endpoint.labels | nindent 6 }}
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: ANY
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          ## References: https://www.envoyproxy.io/docs/envoy/v1.22.2/configuration/http/http_filters/ext_authz_filter
+          name: "envoy.filters.http.ext_authz"
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+            http_service:
+              server_uri:
+                uri: http://{{ include "auth-gateway.gatewayDomain" . }}:{{ include "auth-gateway.gatewayPort" . }}
+                cluster: outbound|{{ include "auth-gateway.gatewayPort" . }}||{{ include "auth-gateway.gatewayDomain" . }}
+                timeout: {{ .Values.endpoint.timeout }}
+              authorization_request:
+                allowed_headers:
+                  patterns:
+                    - exact: cookie
+              authorization_response:
+                allowed_upstream_headers:
+                  patterns:
+                    - prefix: x-forwarded
+                    - prefix: x-auth-request

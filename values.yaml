@@ -1,0 +1,164 @@
+# Default values for auth-gateway.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  # -- Domain name of the Kubernetes cluster
+  clusterDomain: "cluster.local"
+
+endpoint:
+  # -- Namespace where the target istio-proxy is located
+  namespace: default
+  # -- Labels of istio-proxy
+  labels:
+    app: istio-authgateway
+  # -- Externally published istio-proxy URL; used for OIDC redirects
+  frontendUrl: "https://app.example.com"
+  # -- Waiting time for authentication process at gateway
+  timeout: 5s
+
+keycloak:
+  # -- Namespace where Keycloak CR is located
+  namespace: keycloak
+  # -- Externally published Keycloak URL; used for OIDC redirects
+  frontendUrl: "https://keycloak.example.com"
+  realm:
+    # -- Name of a realm to which a KeycloakClient is tied.
+    name: gateway
+    sample:
+      # -- Generating a KeycloakRealm CR as a sample
+      create: true
+      # -- Labels of the Keycloak CR that will create the Realm
+      keycloakLabels:
+        app: keycloak
+      user:
+        # -- Generating a KeycloakUser CR as a sample
+        create: true
+        # -- Sample user name for login
+        name: sample
+        # -- Sample user password for login
+        password: sample
+  client:
+    # -- Secret resource includes CLIENT_ID and CLIENT_SECRET.
+    # This is usually created by a Keycloak Operator, but you can also use your own secret.
+    # This Secret must be in the same Namespace as the Istio Auth Gateway.
+    # If `keycloak.client.sample.create` is true, the field is ignored
+    secret: ""
+    sample:
+      # -- Specifies whether a sample KeycloakClient  is created
+      create: true
+      # -- Name of a KeycloakRealm CR to which a KeycloakClient is tied.
+      name: gateway
+      # -- Labels of the KeycloakRealm CR that will create the Client.
+      # If you generate a sample realm, this field is ignored.
+      realmLabels:
+        app: auth-gateway
+
+gateway:
+  # -- Types of tools to be used as an authorization gateway.
+  # Currently only oauth2-proxy
+  type: oauth2-proxy
+
+  # see detail at https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/
+  oauth2Proxy:
+    cookie:
+      # -- Cookie name of login session. you should add
+      # a [cookie prefix](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#cookie_prefixes)
+      # (__Host- or __Secure-) if gateway.oauth2Proxy.cookie.secure is true
+      name: auth-gateway
+      # -- SameSite attribute "strict" or "lax" or none"
+      sameSite: strict
+      # -- Refresh duration of the cookie. 0 to disable
+      refresh: 1m
+      # -- Expire duration of the cookie. It cannot be disabled
+      expire: 2m
+      # -- Set secure cookie flag
+      secure: false
+
+    # -- Email domains of permitted users. Multiple domains can be specified separated by commas,
+    # such as "foo.com,bar.net". "*" allows any domain.
+    emailDomains: "*"
+    # --Skip verification of https certificates.
+    # If using a self-signed certificate, set true
+    sslInsecureSkipVerify: false
+    # -- Propagate user info(email, username) to the client application
+    xAuthRequest: true
+
+    logging:
+      # -- Specifies whether to output the log when a user authenticates
+      auth: true
+      # -- Specifies whether to output request logs
+      request: true
+      # -- Specifies whether to output request logs of health check
+      healthCheckLog: false
+
+    # -- Extra environment variables to add to oauth2-proxy.
+    # Please see [values.yaml](./values.yaml) and
+    # [Oauth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/) for details.
+    extraEnvVars:
+      []
+      # extraEnvVars:
+      # - name: OAUTH2_PROXY_EXCLUDE_LOGGING_PATHS
+      #   value: "/ping"
+
+    image:
+      # -- Container image repository of OAuth2 Proxy
+      repository: "quay.io/oauth2-proxy/oauth2-proxy"
+      # -- Container image tag of OAuth2 Proxy (immutable tags are recommended)
+      tag: "v7.3.0"
+      # -- Container image pull policy of OAuth2 Proxy
+      pullPolicy: IfNotPresent
+    # -- Container image pull secrets of OAuth2 Proxy
+    imagePullSecrets: []
+
+    service:
+      # -- Service type of OAuth2 Proxy "ClusterIP" or "NodePort" or "LoadBalancer"
+      type: ClusterIP
+      # -- Service and Target port of OAuth2 Proxy
+      port: 4180
+      # -- Node port of OAuth2 Proxy. This only applies when `service.type` is "NodePort"
+      nodePort: 34180
+
+  # -- Resource requests and limits for the gateway deployment. Please see [values.yaml](./values.yaml) for details.
+  resources:
+    {}
+    # requests:
+    #   cpu: 10m
+    #   memory: 128Mi
+    # limits:
+    #   cpu: 30m
+    #   memory: 512Mi
+
+  # -- Annotations for the gateway deployment.
+  podAnnotations: {}
+
+  # -- SecurityContext for the all containers in gateway pod. Please see [values.yaml](./values.yaml) for details.
+  podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+  # -- SecurityContext for the gateway container. Please see [values.yaml](./values.yaml) for details.
+  securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  # -- Node labels for the gateway deployment
+  nodeSelector: {}
+  # -- Tolerations for the gateway deployment
+  tolerations: []
+  # -- Affinities for the gateway deployment
+  affinity: {}
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""

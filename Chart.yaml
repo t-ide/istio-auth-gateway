@@ -1,0 +1,22 @@
+apiVersion: v2
+appVersion: "1.16.0"
+version: 0.1.0
+name: istio-auth-gateway
+description: Istio Auth Gateway is a Helm Chart that integrates Istio and Keycloak to perform OIDC-based user authentication transparently from the application.
+home: https://github.com/t-ide/istio-auth-gateway
+type: application
+keywords:
+  - kubernetes
+  - oidc
+  - authentication
+  - istio
+  - keycloak
+  - oauth2-proxy
+sources:
+  - https://github.com/t-ide/istio-auth-gateway
+  - https://github.com/istio/istio
+  - https://github.com/keycloak/keycloak
+  - https://github.com/keycloak/keycloak-operator
+  - https://github.com/oauth2-proxy/oauth2-proxy
+maintainers:
+  - name: Takaya Ide
