@@ -12,7 +12,8 @@ This is a kind of authentication gateway using Istio that allows you to grant us
 - [Helm](https://github.com/helm/helm) 3.0.0 - 3.10.0
 - [Istio](https://github.com/istio/istio) 1.5.0 - 1.15.1
 - [Keycloak](https://github.com/keycloak/keycloak) 1.18.0 - 19.0.2-legacy
-- [Optional] [Keycloak Operator](https://github.com/keycloak/keycloak-operator) 17.0.0 - 19.0.2-legacy ... For auto-generation of Realm and Client. See [Use your own Realm and Client](#use-your-own-realm-and-client) for the details.
+- [Optional] [Keycloak Operator](https://github.com/keycloak/keycloak-operator) 17.0.0 - 19.0.2-legacy
+    - For auto-generation of Realm and Client. See [Use your own Realm and Client](#use-your-own-realm-and-client) for the details.
 
 ## Getting started
 
@@ -39,7 +40,7 @@ Enter `sample` in username and password and you can access the client applicatio
 
 ## Architecture
 
-<img src="./img/architecture.svg" alt="Figure of architecture and resources deployed in the chart" width="80%">
+<img src="./img/architecture.svg" alt="Figure of architecture and resources deployed in the chart">
 
 Istio Auth Gateway forwards user requests to the endpoint to the gateway using an EnvoyFilter.
 
@@ -157,7 +158,7 @@ kubectl delete secret myclient --namespace keycloak
 | gateway.oauth2Proxy.cookie.refresh | string | `"1m"` | Refresh duration of the cookie. 0 to disable |
 | gateway.oauth2Proxy.cookie.expire | string | `"2m"` | Expire duration of the cookie. It cannot be disabled |
 | gateway.oauth2Proxy.cookie.secure | bool | `false` | Set secure cookie flag |
-| gateway.oauth2Proxy.emailDomains | string | `"*"` | Email domains of permitted users. Multiple domains can be specified separated by commas, such as "foo.com, bar.net". "*" means any domain. |
+| gateway.oauth2Proxy.emailDomains | string | `"*"` | Email domains of permitted users. Multiple domains can be specified separated by commas, such as "foo.com,bar.net". "*" allows any domain. |
 | gateway.oauth2Proxy.sslInsecureSkipVerify | bool | `false` | Skip verification of https certificates. If using a self-signed certificate, set true |
 | gateway.oauth2Proxy.xAuthRequest | bool | `true` | Propagate user info(email, username) to the client application |
 | gateway.oauth2Proxy.logging.auth | bool | `true` | Specifies whether to output the log when a user authenticates |
