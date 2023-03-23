@@ -105,7 +105,7 @@ gateway:
       # -- Container image repository of OAuth2 Proxy
       repository: "quay.io/oauth2-proxy/oauth2-proxy"
       # -- Container image tag of OAuth2 Proxy (immutable tags are recommended)
-      tag: "v7.3.0"
+      tag: "v7.4.0"
       # -- Container image pull policy of OAuth2 Proxy
       pullPolicy: IfNotPresent
     # -- Container image pull secrets of OAuth2 Proxy
